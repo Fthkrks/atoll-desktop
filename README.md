@@ -43,3 +43,14 @@ Paketleme betiğinin `-ModelPath` parametresi kaynak modeli kopyalar; taşımaz 
 ## Bilinen sınırlar
 
 PDF çevirisi metni sayfanın üzerine yeniden yazar; özgün metin altta kalır. Metin katmanı için renkli arka planlarda beyaz örtü görülebilir. OCR kapalıysa veya Windows OCR dili yüklü değilse görsellerdeki metin çevrilmez. Excel sayfa adları, formül referanslarını korumak için varsayılan olarak çevrilmez.
+
+## Atoll projects
+
+- [atoll](https://github.com/Fthkrks/atoll): Android app (Flutter + llama.cpp via llamadart)
+- [atoll-desktop](https://github.com/Fthkrks/atoll-desktop): Windows app (WinUI 3 + LLamaSharp)
+- [atoll-web](https://github.com/Fthkrks/atoll-web): website (Next.js), https://atoll-one.vercel.app
+- [atoll-releases](https://github.com/Fthkrks/atoll-releases): Windows downloads
+
+## License
+
+The source code is released under the [MIT License](LICENSE). The translation model is not part of this repository. It is the Tencent Hy-MT2 1.8B GGUF model ([tencent/Hy-MT2-1.8B-GGUF](https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF)), released by Tencent under the Apache License 2.0.
