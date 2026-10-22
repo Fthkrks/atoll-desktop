@@ -1,0 +1,160 @@
+<Page
+    x:Class="HyTranslate.App.Views.TextTranslatePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:HyTranslate.App.Controls"
+    xmlns:vm="using:HyTranslate.App.ViewModels"
+    mc:Ignorable="d">
+
+    <Grid Padding="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Row: Language selection + Action -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <controls:LanguageSelectorControl
+                Grid.Column="0"
+                SourceLanguages="{x:Bind ViewModel.SourceLanguages, Mode=OneWay}"
+                SelectedSourceLanguage="{x:Bind ViewModel.SelectedSourceLanguage, Mode=TwoWay}"
+                TargetLanguages="{x:Bind ViewModel.TargetLanguages, Mode=OneWay}"
+                SelectedTargetLanguage="{x:Bind ViewModel.SelectedTargetLanguage, Mode=TwoWay}"
+                SwapCommand="{x:Bind ViewModel.SwapLanguagesCommand, Mode=OneWay}"
+                CanSwap="{x:Bind ViewModel.CanSwap, Mode=OneWay}" />
+
+            <Button
+                Grid.Column="1"
+                Content="Çevir"
+                Command="{x:Bind ViewModel.TranslateCommand, Mode=OneWay}"
+                Style="{ThemeResource AccentButtonStyle}"
+                Margin="8,0,0,0"
+                Height="36" />
+        </Grid>
+
+        <!-- Error InfoBar -->
+        <InfoBar
+            Grid.Row="1"
+            IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+            Severity="Error"
+            Title="Hata"
+            Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+
+        <!-- Cards container (Adaptive with SizeChanged at 720px) -->
+        <Grid x:Name="PanesGrid" Grid.Row="2" ColumnSpacing="16" RowSpacing="16" SizeChanged="PanesGrid_SizeChanged">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftCol" Width="*" />
+                <ColumnDefinition x:Name="RightCol" Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="TopRow" Height="*" />
+                <RowDefinition x:Name="BottomRow" Height="0" />
+            </Grid.RowDefinitions>
+
+            <!-- Left Card: Source Text -->
+            <Border
+                x:Name="LeftCard"
+                Grid.Row="0"
+                Grid.Column="0"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBox
+                        x:Name="SourceTextBox"
+                        Grid.Row="0"
+                        AcceptsReturn="True"
+                        TextWrapping="Wrap"
+                        PlaceholderText="Çevrilecek metni yazın (Ctrl+Enter ile çevir)"
+                        Text="{x:Bind ViewModel.SourceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        KeyDown="SourceTextBox_KeyDown"
+                        BorderThickness="0"
+                        Background="Transparent"
+                        FontSize="15" />
+
+                    <!-- Bottom Bar -->
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                        <TextBlock
+                            Text="{x:Bind ViewModel.CharacterCountText, Mode=OneWay}"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            FontSize="12" />
+
+                        <Button
+                            HorizontalAlignment="Right"
+                            Width="32"
+                            Height="32"
+                            Padding="0"
+                            Command="{x:Bind ViewModel.ClearCommand, Mode=OneWay}"
+                            ToolTipService.ToolTip="Temizle">
+                            <FontIcon Glyph="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="12" />
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Right Card: Translated Text -->
+            <Border
+                x:Name="RightCard"
+                Grid.Row="0"
+                Grid.Column="1"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBox
+                        Grid.Row="0"
+                        IsReadOnly="True"
+                        AcceptsReturn="True"
+                        TextWrapping="Wrap"
+                        PlaceholderText="Çeviri"
+                        Text="{x:Bind ViewModel.TargetText, Mode=OneWay}"
+                        BorderThickness="0"
+                        Background="Transparent"
+                        FontSize="15" />
+
+                    <!-- Bottom Bar -->
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                        <ProgressRing
+                            IsActive="{x:Bind ViewModel.IsTranslating, Mode=OneWay}"
+                            Width="20"
+                            Height="20"
+                            HorizontalAlignment="Left" />
+
+                        <Button
+                            HorizontalAlignment="Right"
+                            Width="32"
+                            Height="32"
+                            Padding="0"
+                            Command="{x:Bind ViewModel.CopyCommand, Mode=OneWay}"
+                            ToolTipService.ToolTip="Kopyala">
+                            <FontIcon Glyph="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="12" />
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

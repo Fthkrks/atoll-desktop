@@ -1,0 +1,12 @@
+﻿[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.gguf
+artifacts/
+publish/
+**/publish/
+TestResults/
+*.log

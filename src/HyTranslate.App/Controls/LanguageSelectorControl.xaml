@@ -1,0 +1,50 @@
+<UserControl
+    x:Class="HyTranslate.App.Controls.LanguageSelectorControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:lang="using:HyTranslate.Core.Languages"
+    mc:Ignorable="d">
+
+    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <!-- Source Language ComboBox -->
+        <ComboBox
+            x:Name="SourceComboBox"
+            MinWidth="160"
+            ItemsSource="{x:Bind SourceLanguages, Mode=OneWay}"
+            SelectedItem="{x:Bind SelectedSourceLanguage, Mode=TwoWay}"
+            PlaceholderText="Kaynak Dil">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="lang:LanguageItem">
+                    <TextBlock Text="{x:Bind TurkishName}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <!-- Swap Button -->
+        <Button
+            x:Name="SwapButton"
+            Width="40"
+            Height="36"
+            Command="{x:Bind SwapCommand, Mode=OneWay}"
+            IsEnabled="{x:Bind CanSwap, Mode=OneWay}"
+            ToolTipService.ToolTip="Dilleri Değiştir (⇄)">
+            <FontIcon Glyph="&#xE8AB;" FontFamily="Segoe MDL2 Assets" FontSize="14" />
+        </Button>
+
+        <!-- Target Language ComboBox -->
+        <ComboBox
+            x:Name="TargetComboBox"
+            MinWidth="160"
+            ItemsSource="{x:Bind TargetLanguages, Mode=OneWay}"
+            SelectedItem="{x:Bind SelectedTargetLanguage, Mode=TwoWay}"
+            PlaceholderText="Hedef Dil">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="lang:LanguageItem">
+                    <TextBlock Text="{x:Bind TurkishName}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+    </StackPanel>
+</UserControl>
