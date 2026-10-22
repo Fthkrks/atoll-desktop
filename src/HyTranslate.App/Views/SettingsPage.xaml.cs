@@ -59,6 +59,19 @@ public sealed partial class SettingsPage : Page
         }
     }
 
+    private async void BrowseEmbeddedModel_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FileOpenPicker { SuggestedStartLocation = PickerLocationId.ComputerFolder };
+        picker.FileTypeFilter.Add(".gguf");
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.CurrentWindow));
+        var file = await picker.PickSingleFileAsync();
+        if (file != null)
+        {
+            ViewModel.EmbeddedModelPath = file.Path;
+            await ViewModel.TestConnectionAsync();
+        }
+    }
+
     private async void BrowseOllamaExe_Click(object sender, RoutedEventArgs e)
     {
         var picker = new FileOpenPicker

@@ -1,0 +1,40 @@
+Atoll 1.0.0 - 4pp Studio
+
+Tencent HY-MT2-1.8B-GGUF, Q4_K_M, unmodified model weights.
+Copyright (C) 2026 Tencent. All rights reserved.
+Apache License 2.0. Current official repository revision (checked 2026-10-22):
+a0c709d9fac510f2c807aa3af52872340dc37a4a
+https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF/blob/a0c709d9fac510f2c807aa3af52872340dc37a4a/LICENSE.txt
+https://huggingface.co/api/models/tencent/Hy-MT2-1.8B-GGUF/tree/a0c709d9fac510f2c807aa3af52872340dc37a4a
+The official Q4_K_M asset's LFS SHA256 and local model hash match:
+dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699
+No separate upstream NOTICE file is present at this revision.
+
+The current Apache 2.0 model license grants worldwide rights and does not exclude
+the European Union, United Kingdom, or South Korea. Earlier Tencent community
+license versions included territory and use restrictions; the current official
+license for this exact model asset is the included Apache 2.0 text.
+Redistribution: include the license; identify modified files if any; retain
+applicable copyright, attribution, patent, trademark and upstream NOTICE notices.
+Apache 2.0 does not grant Tencent trademark rights or provide a warranty.
+
+LLamaSharp 0.30.0, MIT, SciSharp STACK.
+https://github.com/SciSharp/LLamaSharp/blob/v0.30.0/LICENSE
+CPU backend only. AVX/AVX2/AVX512/no-AVX variants are selected automatically.
+No CUDA or Vulkan backend is included.
+
+llama.cpp c0c7e147e7efa6c5858754b47259ba4880f8a906, MIT.
+https://github.com/ggml-org/llama.cpp/blob/c0c7e147e7efa6c5858754b47259ba4880f8a906/LICENSE
+
+.NET runtime: MIT and included third-party notices.
+https://github.com/dotnet/runtime/blob/v10.0.0/LICENSE.TXT
+https://github.com/dotnet/runtime/blob/v10.0.0/THIRD-PARTY-NOTICES.TXT
+Windows App SDK 1.6.250205002: included Microsoft license and third-party notices.
+https://www.nuget.org/packages/Microsoft.WindowsAppSDK/1.6.250205002
+Microsoft Visual C++ 2015-2022 Runtime: app-local, signed Microsoft release DLLs.
+https://visualstudio.microsoft.com/license-terms/vs2022-cruntime/
+https://learn.microsoft.com/cpp/windows/deployment-in-visual-cpp
+
+Other managed components: DocumentFormat.OpenXml (MIT), PdfPig (Apache-2.0),
+PDFsharp (MIT), CommunityToolkit.Mvvm and HighPerformance (MIT),
+Microsoft.Extensions.*, System.* and Microsoft.Bcl.* (MIT).

@@ -8,6 +8,8 @@ using CommunityToolkit.Mvvm.Input;
 using HyTranslate.Core.Ocr;
 using HyTranslate.Core.Ollama;
 using HyTranslate.Core.Settings;
+using HyTranslate.Core.Translation;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -27,6 +29,28 @@ public class SettingsViewModel : ObservableObject
     private readonly OllamaClient _ollamaClient;
     private readonly OllamaServerManager _serverManager;
     private readonly DispatcherQueue _dispatcherQueue;
+    private readonly AppSettings _liveSettings;
+    private readonly LlamaSharpTranslator _embedded;
+    private string _backend = "Built-in";
+    private string _embeddedModelPath = "";
+    public string[] Backends { get; } = ["Built-in", "Ollama"];
+    public string Backend
+    {
+        get => _backend;
+        set
+        {
+            if (SetProperty(ref _backend, value))
+            {
+                OnPropertyChanged(nameof(OllamaVisibility));
+                OnPropertyChanged(nameof(BuiltInVisibility));
+            }
+        }
+    }
+    public Visibility OllamaVisibility => Backend == "Ollama" ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility BuiltInVisibility => Backend == "Ollama" ? Visibility.Collapsed : Visibility.Visible;
+    public string EmbeddedModelPath { get => _embeddedModelPath; set => SetProperty(ref _embeddedModelPath, value); }
+    public string ResolvedModelPath => _embedded.ResolvedPath ?? "Model dosyası bulunamadı. Model dosyası seç…";
+    public string ModelLoadStatus => _embedded.Status;
 
     private string _modelsPath = string.Empty;
     private int _managedPort = 11435;
@@ -235,17 +259,34 @@ public class SettingsViewModel : ObservableObject
     public SettingsViewModel(
         SettingsManager settingsManager,
         OllamaClient ollamaClient,
-        OllamaServerManager serverManager)
+        OllamaServerManager serverManager,
+        AppSettings liveSettings,
+        LlamaSharpTranslator embedded)
     {
         _settingsManager = settingsManager ?? throw new ArgumentNullException(nameof(settingsManager));
         _ollamaClient = ollamaClient ?? throw new ArgumentNullException(nameof(ollamaClient));
         _serverManager = serverManager ?? throw new ArgumentNullException(nameof(serverManager));
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        _liveSettings = liveSettings;
+        _embedded = embedded;
+        _embedded.StatusChanged += () => UpdateUi(() =>
+        {
+            OnPropertyChanged(nameof(ModelLoadStatus));
+            OnPropertyChanged(nameof(ResolvedModelPath));
+        });
 
         SaveAndStartServerCommand = new AsyncRelayCommand(SaveAndStartServerAsync);
         TestConnectionCommand = new AsyncRelayCommand(TestConnectionAsync);
         DownloadModelCommand = new AsyncRelayCommand(DownloadModelAsync);
-        SaveSettingsCommand = new AsyncRelayCommand(SaveSettingsAsync);
+        SaveSettingsCommand = new AsyncRelayCommand(async () =>
+        {
+            try
+            {
+                await SaveSettingsAsync();
+                TestResultMessage = "✓ Ayarlar kaydedildi.";
+            }
+            catch (Exception ex) { TestResultMessage = $"Hata: {ex.Message}"; }
+        });
     }
 
     public async Task InitializeAsync()
@@ -253,6 +294,8 @@ public class SettingsViewModel : ObservableObject
         var settings = await _settingsManager.LoadSettingsAsync().ConfigureAwait(false);
         UpdateUi(() =>
         {
+            Backend = settings.Backend;
+            EmbeddedModelPath = settings.EmbeddedModelPath;
             OllamaUrl = settings.OllamaUrl;
             ModelName = settings.ModelName;
             Theme = settings.Theme;
@@ -299,12 +342,15 @@ public class SettingsViewModel : ObservableObject
 
     public async Task SaveAndStartServerAsync()
     {
+        if (Backend != "Ollama") return;
         IsStartingServer = true;
         try
         {
             var currentSettings = await _settingsManager.LoadSettingsAsync().ConfigureAwait(false);
             var settings = new AppSettings
             {
+                Backend = Backend,
+                EmbeddedModelPath = EmbeddedModelPath,
                 OllamaUrl = OllamaUrl,
                 ModelName = ModelName,
                 Theme = Theme,
@@ -319,6 +365,7 @@ public class SettingsViewModel : ObservableObject
                 OcrLanguage = SelectedOcrLanguageItem?.Tag ?? ""
             };
             await _settingsManager.SaveSettingsAsync(settings).ConfigureAwait(false);
+            CopyLiveSettings(settings);
 
             if (_serverManager.IsRunning)
             {
@@ -383,36 +430,15 @@ public class SettingsViewModel : ObservableObject
 
         try
         {
-            bool isAlive = await _ollamaClient.IsAliveAsync().ConfigureAwait(false);
-
-            if (!isAlive)
-            {
-                UpdateUi(() =>
-                {
-                    IsConnectionSuccessful = false;
-                    TestResultMessage = "✗ Ollama sunucusuna ulaşılamadı. `ollama serve` ile başlatın.";
-                    HasTested = true;
-                });
-                return;
-            }
-
-            bool hasModel = await _ollamaClient.HasModelAsync(ModelName).ConfigureAwait(false);
+            await SaveSettingsAsync().ConfigureAwait(false);
+            var output = await App.Services.GetRequiredService<ITranslator>().TranslateAsync("Hello", "tr").ConfigureAwait(false);
             UpdateUi(() =>
             {
-                if (hasModel)
-                {
-                    IsConnectionSuccessful = true;
-                    TestResultMessage = $"✓ Ollama çalışıyor / ✓ Model '{ModelName}' yüklü.";
-                }
-                else
-                {
-                    IsConnectionSuccessful = false;
-                    TestResultMessage = $"✓ Ollama çalışıyor / ✗ Model '{ModelName}' henüz indirilmemiş.";
-                }
+                IsConnectionSuccessful = true;
+                TestResultMessage = $"✓ Hello → {output}";
                 HasTested = true;
             });
-
-            await RefreshAvailableModelsAsync().ConfigureAwait(false);
+            return;
         }
         catch (Exception ex)
         {
@@ -434,6 +460,7 @@ public class SettingsViewModel : ObservableObject
 
     public async Task DownloadModelAsync()
     {
+        if (Backend != "Ollama") return;
         IsDownloading = true;
         DownloadProgress = 0;
         DownloadStatusText = "İndirme başlatılıyor...";
@@ -479,6 +506,7 @@ public class SettingsViewModel : ObservableObject
 
     public async Task RefreshAvailableModelsAsync()
     {
+        if (Backend != "Ollama") return;
         try
         {
             var models = await _ollamaClient.ListModelsAsync().ConfigureAwait(false);
@@ -502,6 +530,8 @@ public class SettingsViewModel : ObservableObject
         var currentSettings = await _settingsManager.LoadSettingsAsync().ConfigureAwait(false);
         var settings = new AppSettings
         {
+            Backend = Backend,
+            EmbeddedModelPath = EmbeddedModelPath,
             OllamaUrl = OllamaUrl,
             ModelName = ModelName,
             Theme = Theme,
@@ -516,6 +546,14 @@ public class SettingsViewModel : ObservableObject
             OcrLanguage = SelectedOcrLanguageItem?.Tag ?? ""
         };
         await _settingsManager.SaveSettingsAsync(settings).ConfigureAwait(false);
+        bool changed = _liveSettings.Backend != settings.Backend || _liveSettings.EmbeddedModelPath != settings.EmbeddedModelPath;
+        CopyLiveSettings(settings);
+        if (changed) App.Services.GetRequiredService<TranslationService>().ClearCache();
+        if (Backend != "Ollama")
+        {
+            if (_serverManager.IsRunning) await _serverManager.StopAsync().ConfigureAwait(false);
+            await _embedded.EnsureLoadedAsync().ConfigureAwait(false);
+        }
 
         if (string.IsNullOrWhiteSpace(ModelsPath))
         {
@@ -537,6 +575,20 @@ public class SettingsViewModel : ObservableObject
                 };
             }
         });
+    }
+
+    private void CopyLiveSettings(AppSettings settings)
+    {
+        _liveSettings.Backend = settings.Backend;
+        _liveSettings.EmbeddedModelPath = settings.EmbeddedModelPath;
+        _liveSettings.OllamaUrl = settings.OllamaUrl;
+        _liveSettings.ModelName = settings.ModelName;
+        _liveSettings.ModelsPath = settings.ModelsPath;
+        _liveSettings.ManagedPort = settings.ManagedPort;
+        _liveSettings.OllamaExePath = settings.OllamaExePath;
+        _liveSettings.OcrEnabled = settings.OcrEnabled;
+        _liveSettings.OcrLanguage = settings.OcrLanguage;
+        _liveSettings.Theme = settings.Theme;
     }
 
     private void UpdateUi(Action action)

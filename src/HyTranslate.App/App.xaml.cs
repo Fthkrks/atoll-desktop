@@ -46,7 +46,9 @@ public partial class App : Application
         });
 
         // Translation
-        services.AddSingleton<ITranslator, OllamaTranslator>();
+        services.AddSingleton<OllamaTranslator>();
+        services.AddSingleton<LlamaSharpTranslator>();
+        services.AddSingleton<ITranslator, BackendTranslator>();
         services.AddSingleton<TranslationService>();
 
         // OCR

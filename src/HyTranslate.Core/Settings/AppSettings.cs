@@ -2,6 +2,8 @@ namespace HyTranslate.Core.Settings;
 
 public class AppSettings
 {
+    public string Backend { get; set; } = "Built-in";
+    public string EmbeddedModelPath { get; set; } = "";
     public string OllamaUrl { get; set; } = "http://localhost:11434";
     public string ModelName { get; set; } = "maternion/hy-mt2:1.8b";
     public string Theme { get; set; } = "System";

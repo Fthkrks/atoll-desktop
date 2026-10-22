@@ -113,20 +113,7 @@ public static class Languages
     public static string BuildPrompt(string text, string targetLangCode, string? sourceLangCode = null)
     {
         var targetItem = FindByCode(targetLangCode) ?? new LanguageItem(targetLangCode, targetLangCode, targetLangCode, targetLangCode);
-        var sourceItem = (!string.IsNullOrWhiteSpace(sourceLangCode) && !string.Equals(sourceLangCode, AutoCode, StringComparison.OrdinalIgnoreCase))
-            ? FindByCode(sourceLangCode)
-            : null;
-
-        bool useChineseTemplate = IsChinese(targetLangCode) || (sourceItem != null && IsChinese(sourceItem.Code)) || IsChinese(sourceLangCode);
-
-        if (useChineseTemplate)
-        {
-            return $"把下面的文本翻译成{targetItem.ChineseName}，不要额外解释。\n\n{text}";
-        }
-        else
-        {
-            return $"Translate the following segment into {targetItem.EnglishName}, without additional explanation.\n\n{text}";
-        }
+        return $"Translate the following segment into {targetItem.EnglishName}, without additional explanation.\n\n{text}";
     }
 
     public static string PostProcessTranslation(string rawText, string originalText)

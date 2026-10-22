@@ -13,8 +13,24 @@
             <!-- Title -->
             <TextBlock Text="Ayarlar" FontSize="28" FontWeight="SemiBold" />
 
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <ComboBox Header="Çeviri altyapısı (Backend)" ItemsSource="{x:Bind ViewModel.Backends}" SelectedItem="{x:Bind ViewModel.Backend, Mode=TwoWay}" />
+                    <StackPanel Spacing="12" Visibility="{x:Bind ViewModel.BuiltInVisibility, Mode=OneWay}">
+                        <TextBox Header="GGUF model dosyası (boşsa paketteki model)" Text="{x:Bind ViewModel.EmbeddedModelPath, Mode=TwoWay}" />
+                        <Button Content="Model dosyası seç…" Click="BrowseEmbeddedModel_Click" />
+                        <TextBlock Text="{x:Bind ViewModel.ResolvedModelPath, Mode=OneWay}" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                        <TextBlock Text="{x:Bind ViewModel.ModelLoadStatus, Mode=OneWay}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Button Content="Test · Hello → Türkçe" Command="{x:Bind ViewModel.TestConnectionCommand}" IsEnabled="{x:Bind ViewModel.IsTesting, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}" />
+                    <ProgressRing IsActive="{x:Bind ViewModel.IsTesting, Mode=OneWay}" Width="20" Height="20" HorizontalAlignment="Left" />
+                    <TextBlock Text="{x:Bind ViewModel.TestResultMessage, Mode=OneWay}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
             <!-- Model Location Card -->
             <Border
+                Visibility="{x:Bind ViewModel.OllamaVisibility, Mode=OneWay}"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
@@ -101,6 +117,7 @@
 
             <!-- Ollama Card -->
             <Border
+                Visibility="{x:Bind ViewModel.OllamaVisibility, Mode=OneWay}"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
@@ -232,6 +249,8 @@
                 HorizontalAlignment="Left"
                 Height="36"
                 Padding="24,0" />
+
+            <TextBlock Text="Atoll 1.0.0 · 4pp Studio&#xA;Çevrimdışı metin ve belge çevirisi · Tencent HY-MT2 1.8B&#xA;Üçüncü taraf lisansları: uygulama klasöründeki LICENSES dizini." TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
         </StackPanel>
     </ScrollViewer>

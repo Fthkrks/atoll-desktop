@@ -148,7 +148,7 @@ public static class RichParagraphTranslator
         {
             taggedOutput = await service.TranslateRawAsync(taggedInput, targetLang, sourceLang, ct).ConfigureAwait(false);
         }
-        catch (Exception e) when (e is not OperationCanceledException and not OllamaException)
+        catch (Exception e) when (e is not OperationCanceledException and not OllamaException and not EmbeddedModelException)
         {
             return await FallbackAsync(allJoined, baseTemplateRunIndex, service, targetLang, sourceLang, ct).ConfigureAwait(false);
         }

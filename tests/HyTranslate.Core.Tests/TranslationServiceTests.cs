@@ -119,7 +119,7 @@ public class TranslationServiceTests
         Assert.Equal("Translate the following segment into Turkish, without additional explanation.\n\nComment", promptEn);
 
         var promptZh = Languages.Languages.BuildPrompt("Comment", "zh", "en");
-        Assert.Equal("把下面的文本翻译成中文，不要额外解释。\n\nComment", promptZh);
+        Assert.Equal("Translate the following segment into Chinese, without additional explanation.\n\nComment", promptZh);
     }
 
     [Fact]

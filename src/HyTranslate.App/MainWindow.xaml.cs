@@ -19,6 +19,7 @@ public sealed partial class MainWindow : Window
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
+        AppWindow.SetIcon(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Atoll.ico"));
 
         this.Activated += MainWindow_Activated;
         this.Closed += MainWindow_Closed;
@@ -37,6 +38,7 @@ public sealed partial class MainWindow : Window
         {
             await serverManager.StopAsync();
         }
+        App.Services.GetService<HyTranslate.Core.Translation.LlamaSharpTranslator>()?.Dispose();
     }
 
     private void NavView_Loaded(object sender, RoutedEventArgs e)

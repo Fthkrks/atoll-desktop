@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HyTranslate.Core.Ollama;
 using HyTranslate.Core.Settings;
+using HyTranslate.Core.Translation;
 using Microsoft.UI.Dispatching;
 
 namespace HyTranslate.App.ViewModels;
@@ -14,6 +15,7 @@ public class MainViewModel : ObservableObject
     private readonly SettingsManager _settingsManager;
     private readonly OllamaServerManager _serverManager;
     private readonly DispatcherQueue _dispatcherQueue;
+    private readonly LlamaSharpTranslator _embedded;
 
     private bool _showStartupWarning;
     private string _startupWarningMessage = string.Empty;
@@ -56,11 +58,13 @@ public class MainViewModel : ObservableObject
     public MainViewModel(
         OllamaClient ollamaClient,
         SettingsManager settingsManager,
-        OllamaServerManager serverManager)
+        OllamaServerManager serverManager,
+        LlamaSharpTranslator embedded)
     {
         _ollamaClient = ollamaClient ?? throw new ArgumentNullException(nameof(ollamaClient));
         _settingsManager = settingsManager ?? throw new ArgumentNullException(nameof(settingsManager));
         _serverManager = serverManager ?? throw new ArgumentNullException(nameof(serverManager));
+        _embedded = embedded;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         DismissWarningCommand = new RelayCommand(() => ShowStartupWarning = false);
@@ -71,6 +75,21 @@ public class MainViewModel : ObservableObject
         try
         {
             var settings = await _settingsManager.LoadSettingsAsync().ConfigureAwait(false);
+
+            if (settings.Backend != "Ollama")
+            {
+                UpdateUi(() =>
+                {
+                    StartupTitle = "Atoll";
+                    StartupSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational;
+                    StartupWarningMessage = "Gömülü model yükleniyor…";
+                    ShowStartupWarning = true;
+                    ShowSettingsButton = false;
+                });
+                await _embedded.EnsureLoadedAsync().ConfigureAwait(false);
+                UpdateUi(() => ShowStartupWarning = false);
+                return;
+            }
 
             if (!string.IsNullOrWhiteSpace(settings.ModelsPath))
             {
@@ -159,8 +178,8 @@ public class MainViewModel : ObservableObject
             UpdateUi(() =>
             {
                 StartupSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning;
-                StartupTitle = "Ollama Uyarısı";
-                StartupWarningMessage = $"Ollama bağlantı uyarısı: {ex.Message}";
+                StartupTitle = "Atoll · Model uyarısı";
+                StartupWarningMessage = ex.Message;
                 ShowSettingsButton = true;
                 ShowStartupWarning = true;
             });
